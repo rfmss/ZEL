@@ -1,0 +1,101 @@
+/* --- LAYOUT E ESTRUTURA --- */
+#frame { position: fixed; inset: 12px; display: flex; flex-direction: column; overflow: hidden; z-index: 1; }
+
+.logo-area {
+  position: absolute; top: 10px; left: calc(var(--hud-w) + var(--gap)); right: 24px;
+  display: flex; align-items: center; gap: 15px; z-index: 10; height: 30px; overflow: hidden;
+}
+.logo-area img { height: 26px; flex-shrink: 0; }
+
+.hud {
+  position: absolute; left: 0; top: 80px; bottom: 80px; width: var(--hud-w);
+  display: flex; flex-direction: column; align-items: center; gap: 18px; 
+  padding-top: 20px; z-index: 40; 
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  /* Sem borda lateral dura, apenas o fim do background */
+}
+
+.drawer {
+    position: absolute; left: var(--hud-w); top: 80px; bottom: 80px;
+    width: 0; background: var(--bg-drawer); 
+    
+    /* Borda sutil + Sombra flutuante */
+    border-right: var(--border-style);
+    box-shadow: var(--shadow-float);
+    
+    border-top-right-radius: var(--radius);
+    border-bottom-right-radius: var(--radius);
+    
+    overflow: hidden; transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 35; display: flex; flex-direction: column; 
+    backdrop-filter: blur(12px); /* Blur mais forte */
+}
+.drawer.open { width: var(--drawer-w); }
+.drawer-header { height: 50px; border-bottom: var(--border-style); display: flex; align-items: center; justify-content: space-between; padding: 0 15px; flex-shrink: 0; }
+.drawer-content { flex: 1; padding: 15px; overflow-y: auto; opacity: 0; transition: opacity 0.2s; }
+.drawer.open .drawer-content { opacity: 1; }
+
+/* GATILHO MOBILE */
+.mobile-trigger {
+    display: none; position: absolute; left: 0; top: 50%; transform: translateY(-50%);
+    width: 24px; height: 60px; background: var(--color-accent); color: #000;
+    border-radius: 0 var(--radius) var(--radius) 0;
+    justify-content: center; align-items: center; cursor: pointer; z-index: 50;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.5);
+}
+
+/* PAINEL CENTRAL RESPONSIVO */
+.panel {
+  position: absolute; left: 0; right: 0; top: 60px; bottom: 80px;
+  padding: 0 20px; overflow-y: auto; overflow-x: hidden;
+  display: flex; justify-content: center; z-index: 1;
+  background: transparent;
+}
+
+#editor {
+  width: 65vw; max-width: 1100px; min-height: 80vh;
+  outline: none; caret-color: var(--color-accent);
+  padding-bottom: 100px; margin-top: 20px; line-height: 1.7;
+  white-space: pre-wrap; word-break: break-word; overflow-wrap: break-word;
+}
+
+/* CONTROLS (Correção de posição e tamanho) */
+.controls {
+  position: absolute; left: 0; right: 0; bottom: 12px;
+  min-height: var(--controls-h); display: flex; justify-content: center;
+  z-index: 50; pointer-events: none; 
+}
+
+.controls-inner {
+  display: flex; align-items: center; gap: 15px; padding: 0 20px;
+  background: var(--bg-controls); 
+  border: var(--border-style); /* Borda Glass */
+  box-shadow: var(--shadow-float); /* Sombra Glass */
+  border-radius: var(--radius);
+  
+  pointer-events: auto;
+  
+  /* SEGREDO DA LINHA ÚNICA */
+  flex-wrap: nowrap; /* Impede quebra de linha */
+  white-space: nowrap; /* Texto não quebra */
+  overflow-x: auto; /* Se tela for minúscula, rola horizontal */
+  scrollbar-width: none; /* Esconde barra de rolagem horizontal */
+  
+  width: auto; max-width: 90vw; /* Ajusta ao conteúdo, mas não passa da tela */
+  height: var(--controls-h); /* Altura fixa fina */
+  
+  backdrop-filter: blur(12px); 
+}
+.controls-inner::-webkit-scrollbar { display: none; }
+
+/* MOBILE */
+@media (max-width: 900px) {
+    .hud { transform: translateX(-100%); background: var(--bg-drawer); border-right: var(--border-style); height: 100%; top: 0; bottom: 0; left: 0; }
+    .mobile-trigger { display: flex; }
+    .hud.mobile-open { transform: translateX(0); box-shadow: 5px 0 50px rgba(0,0,0,0.5); }
+    .drawer { left: var(--hud-w); width: 0; top: 0; bottom: 0; border-radius: 0; }
+    .drawer.open { width: calc(100vw - var(--hud-w)); }
+    #editor { width: 95vw; }
+    .controls { bottom: 20px; }
+    .controls-inner { width: 95vw; max-width: 95vw; }
+}

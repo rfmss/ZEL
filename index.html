@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ZEL — OS v5.4</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Fira+Code:wght@400;600&family=IBM+Plex+Mono:wght@400;600&family=Share+Tech+Mono&family=VT323&display=swap" rel="stylesheet">
+    
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.4.4/lz-string.min.js"></script>
+    
+    <link rel="stylesheet" href="src/css/main.css">
+</head>
+
+<body>
+
+<div id="gatekeeper" class="modal-overlay active" style="z-index: 9999; background: var(--bg-core); flex-direction: column;">
+    
+    <div id="viewSetup" style="display:none; flex-direction:column; align-items:center; gap:20px; text-align:center;">
+        <h2 data-i18n="welcome" style="letter-spacing:2px;">INICIALIZANDO</h2>
+        <div style="display:flex; gap:15px;">
+            <button class="flag-btn active" data-lang="pt">🇧🇷 PT</button>
+            <button class="flag-btn" data-lang="en">🇺🇸 EN</button>
+            <button class="flag-btn" data-lang="es">🇪🇸 ES</button>
+        </div>
+        <div style="width:250px;">
+            <p data-i18n="create_pass" class="help-text">CRIE SUA SENHA</p>
+            <input type="password" id="setupPass1" class="search-input" style="border:1px solid var(--color-accent); padding:10px; margin-bottom:10px; text-align:center;">
+            <input type="password" id="setupPass2" class="search-input" style="border:1px solid var(--color-accent); padding:10px; margin-bottom:10px; text-align:center;" data-i18n-ph="repeat_pass" placeholder="Confirmar">
+            <button id="btnCreateSession" class="btn-full" data-i18n="start_btn">INICIAR</button>
+        </div>
+    </div>
+
+    <div id="viewLock" style="display:none; flex-direction:column; align-items:center; gap:20px;">
+        <i class="ph ph-lock-key" style="font-size:48px; color:var(--color-accent);"></i>
+        <h2 data-i18n="locked">BLOQUEADO</h2>
+        <input type="password" id="authPass" class="search-input" style="border:1px solid var(--color-accent); padding:10px; width:200px; text-align:center; font-size:18px;">
+        <button id="btnUnlock" class="btn-full" style="width:200px;" data-i18n="unlock_btn">DESBLOQUEAR</button>
+        <span id="authMsg" class="help-text"></span>
+        
+        <div style="margin-top:50px;">
+            <button id="emergencyReset" class="btn-icon danger-trigger" title="HARD RESET"><i class="ph ph-skull" style="font-size:24px;"></i></button>
+        </div>
+    </div>
+</div>
+
+<div id="frame">
+
+    <div class="logo-area">
+        <img src="assets/images/logo.webp" alt="LIT Logo" onerror="this.style.display='none'"> 
+        <div class="marquee-container">
+            <div class="marquee-content">
+                /// SYSTEM READY /// PRESS [F1] FOR HELP :: TYPE --H IN EDITOR
+            </div>
+        </div>
+    </div>
+
+    <div id="mobileTrigger" class="mobile-trigger">
+        <i class="ph ph-caret-right"></i>
+    </div>
+
+    <div class="hud">
+        <div class="hud-rail"></div>
+        <button class="hud-btn" id="tabFiles" title="Arquivos [Alt+1]"><i class="ph ph-folder-open"></i></button>
+        <button class="hud-btn" id="tabNav" title="Navegação [Alt+2]"><i class="ph ph-list-bullets"></i></button>
+        <button class="hud-btn" id="tabMemo" title="Memo [Alt+3]"><i class="ph ph-notepad"></i></button>
+        <button class="hud-btn" id="btnThemeToggle" title="Tema [Alt+T]"><i class="ph ph-sun-dim"></i></button>
+        
+        <div style="flex:1"></div> 
+        
+        <button class="hud-btn danger-trigger" id="btnHardReset" title="HARD RESET"><i class="ph ph-skull"></i></button>
+        <button class="hud-btn" id="hudFs" title="Tela Cheia [F11]"><i class="ph ph-corners-out"></i></button>
+    </div>
+
+    <aside id="drawer" class="drawer">
+        <div class="drawer-header">
+            <span id="drawerTitle">SISTEMA</span>
+            <button id="closeDrawer" class="btn-icon">×</button>
+        </div>
+        
+        <div id="panelFiles" class="drawer-content" style="display:none;">
+            <div class="file-actions">
+                <button class="btn-half" id="btnNewProject">+ NOVO</button>
+                <button class="btn-half" id="btnImport" title="Importar JSON/TXT"><i class="ph ph-upload-simple"></i> ABRIR</button>
+                <input type="file" id="fileInput" style="display:none;" accept=".json,.txt,.md">
+            </div>
+            <div id="projectList" class="list-container"></div>
+        </div>
+
+        <div id="panelNav" class="drawer-content" style="display:none;">
+            <div class="help-text">Estrutura do documento:</div>
+            <div id="chapterList" class="list-container"></div>
+            <button class="btn-full" id="btnInsertChapter" style="margin-top:10px;">INSERIR MARCADOR</button>
+        </div>
+
+        <div id="panelMemo" class="drawer-content" style="display:none;">
+            <textarea id="memoArea" placeholder="Buffer de memória..."></textarea>
+        </div>
+    </aside>
+
+    <main class="panel">
+        <div id="editor" contenteditable="true" spellcheck="false"></div>
+    </main>
+
+    <div class="controls">
+        <div class="controls-inner">
+            <span id="currentDocLabel" class="status-label">DOC: UNTITLED</span>
+            <button class="btn" id="btnFontType" title="Mudar Fonte [Alt+F]"><i class="ph ph-text-aa"></i></button>
+            <button class="btn" id="fontMinus"><i class="ph ph-minus"></i></button>
+            <button class="btn" id="fontPlus"><i class="ph ph-plus"></i></button>
+            <div class="divider"></div>
+            <button class="btn" id="btnSave" title="Salvar [Ctrl+S]"><i class="ph ph-floppy-disk"></i> EXPORTAR</button>
+            <div style="flex:1"></div> 
+            <div class="search-wrapper">
+                <i class="ph ph-magnifying-glass search-icon"></i>
+                <input id="search" class="search-input" placeholder="Buscar... [Ctrl+F]" />
+                <button class="btn-icon" id="btnSearch">Go</button>
+                <button class="btn-icon" id="btnClear">×</button>
+            </div>
+            <div class="divider"></div>
+            <button class="btn" id="btnAudio" title="Música [Alt+M]"><i class="ph ph-speaker-high"></i> SOM</button>
+            
+            <button class="btn" id="btnLock" title="Bloquear Tela [Alt+L]"><i class="ph ph-lock-key"></i> LOCK</button>
+        </div>
+    </div>
+
+    <div id="exportModal" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-header"><span>PROTOCOLO DE EXTRAÇÃO</span><button id="closeModalExport" class="btn-icon">×</button></div>
+            <div class="modal-body">
+                <div class="export-grid">
+                    <div class="export-card" id="actionDownloadJson"><i class="ph ph-package"></i><span>BACKUP TOTAL</span><small>.json</small></div>
+                    <div class="export-card" id="actionDownloadTxt"><i class="ph ph-file-text"></i><span>APENAS TEXTO</span><small>.txt</small></div>
+                    <div class="export-card" id="actionQrCode"><i class="ph ph-qr-code"></i><span>NEURAL LINK</span><small>Mobile</small></div>
+                </div>
+                <div id="qrContainer" style="display:none; margin-top:20px; text-align:center;">
+                    <p class="help-text" style="margin-bottom:10px; font-size:11px; opacity:0.8;"><i class="ph ph-warning"></i> <strong>ATENÇÃO:</strong> Mesma Wi-Fi necessária.</p>
+                    <div style="background:#fff; padding:15px; display:inline-block; border-radius:4px;"><div id="qrcode"></div></div>
+                    <div id="qrLinkZone" style="margin-top:10px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+   <div id="resetModal" class="modal-overlay">
+        <div class="modal-box danger-zone">
+            <div class="modal-header" style="border-color:#ff4444; color:#ff4444;">
+                <span>⚠️ ZONA DE PERIGO</span>
+                <button id="closeModalReset" class="btn-icon">×</button>
+            </div>
+            <div class="modal-body" style="text-align:center;">
+                <p>Isso apagará <strong>TODOS</strong> os arquivos e configurações.</p>
+                <button class="btn-full danger-btn" id="btnConfirmReset1">SIM, QUERO APAGAR</button>
+                
+                <div id="step2Reset" style="display:none; margin-top:20px; border-top:1px solid #ff4444; padding-top:20px;">
+                    <p style="font-size:12px; margin-bottom:10px; color:#ff4444;">DIGITE SUA SENHA PARA AUTORIZAR A DESTRUIÇÃO:</p>
+                    
+                    <input type="password" id="resetPassInput" class="search-input" 
+                           style="border:1px solid #ff4444; padding:10px; text-align:center; color:#ff4444; margin-bottom:10px;" 
+                           placeholder="Senha de Acesso">
+                    
+                    <button class="btn-full danger-btn" id="btnConfirmReset2" style="background:#ff4444; color:black; font-weight:bold;">
+                        <i class="ph ph-warning"></i> DELETAR PARA SEMPRE
+                    </button>
+                    
+                    <span id="resetMsg" style="display:block; margin-top:10px; font-size:11px; color:#ff4444; height:15px;"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="helpModal" class="modal-overlay">
+        <div class="modal-box" style="max-width: 500px; height: 500px; display: flex; flex-direction: column;">
+            
+            <div class="modal-header">
+                <span>MANUAL DE COMANDO</span>
+                <button id="closeModalHelp" class="btn-icon">×</button>
+            </div>
+
+            <div class="help-tabs-container">
+                <button class="help-tab active" data-target="help-geral" tabindex="0">GERAL</button>
+                <button class="help-tab" data-target="help-tools" tabindex="0">FERRAMENTAS</button>
+                <button class="help-tab" data-target="help-nav" tabindex="0">NAVEGAÇÃO</button>
+                <button class="help-tab" data-target="help-slash" tabindex="0">SLASH COMMANDS</button>
+            </div>
+
+            <div class="modal-body" style="flex:1; overflow-y:auto;">
+                
+                <div id="help-geral" class="help-panel active">
+                    <div class="shortcut-row"><span class="action-name">Ajuda</span><div class="keys-group"><kbd>F1</kbd></div></div>
+                    <div class="shortcut-row"><span class="action-name">Salvar / Exportar</span><div class="keys-group"><kbd>Ctrl</kbd>+<kbd>S</kbd></div></div>
+                    <div class="shortcut-row"><span class="action-name">Abrir / Importar</span><div class="keys-group"><kbd>Ctrl</kbd>+<kbd>O</kbd></div></div>
+                    <div class="shortcut-row"><span class="action-name">Tela Cheia (Zen)</span><div class="keys-group"><kbd>F11</kbd></div></div>
+                    <div class="shortcut-row"><span class="action-name">Buscar</span><div class="keys-group"><kbd>Ctrl</kbd>+<kbd>F</kbd></div></div>
+                    <div class="shortcut-row"><span class="action-name">Fechar / Focar Editor</span><div class="keys-group"><kbd>Esc</kbd></div></div>
+                </div>
+
+                <div id="help-tools" class="help-panel">
+                    <div class="shortcut-row"><span class="action-name">Trocar Tema</span><div class="keys-group"><kbd>Alt</kbd>+<kbd>T</kbd></div></div>
+                    <div class="shortcut-row"><span class="action-name">Música (Play/Stop)</span><div class="keys-group"><kbd>Alt</kbd>+<kbd>M</kbd></div></div>
+                    <div class="shortcut-row"><span class="action-name">Pomodoro (25m)</span><div class="keys-group"><kbd>Alt</kbd>+<kbd>P</kbd></div></div>
+                    <div class="shortcut-row"><span class="action-name">Mudar Fonte</span><div class="keys-group"><kbd>Alt</kbd>+<kbd>F</kbd></div></div>
+                </div>
+
+                <div id="help-nav" class="help-panel">
+                    <div class="shortcut-row"><span class="action-name">Abrir Arquivos</span><div class="keys-group"><kbd>Alt</kbd>+<kbd>1</kbd></div></div>
+                    <div class="shortcut-row"><span class="action-name">Abrir Navegação</span><div class="keys-group"><kbd>Alt</kbd>+<kbd>2</kbd></div></div>
+                    <div class="shortcut-row"><span class="action-name">Abrir Memo</span><div class="keys-group"><kbd>Alt</kbd>+<kbd>3</kbd></div></div>
+                    <div class="shortcut-row"><span class="action-name">Fechar Gaveta</span><div class="keys-group"><kbd>Alt</kbd>+<kbd>0</kbd></div></div>
+                </div>
+
+                <div id="help-slash" class="help-panel">
+                    <p class="help-text" style="text-align:center; margin-bottom:15px;">Digite no editor para ativar:</p>
+                    <div class="shortcut-row"><span class="action-name">Ajuda</span><span class="cmd">--h</span></div>
+                    <div class="shortcut-row"><span class="action-name">Salvar</span><span class="cmd">--save</span></div>
+                    <div class="shortcut-row"><span class="action-name">Importar</span><span class="cmd">--open</span></div>
+                    <div class="shortcut-row"><span class="action-name">Mudar Tema</span><span class="cmd">--theme</span></div>
+                    <div class="shortcut-row"><span class="action-name">Tela Cheia</span><span class="cmd">--zen</span></div>
+                    <div class="shortcut-row"><span class="action-name">Música</span><span class="cmd">--music</span></div>
+                    <div class="shortcut-row"><span class="action-name">Pomodoro</span><span class="cmd">--pomo</span></div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script type="module" src="src/js/app.js"></script>
+</body>
+</html>

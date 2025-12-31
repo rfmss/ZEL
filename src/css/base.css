@@ -1,0 +1,184 @@
+/* --- VARIAVEIS GERAIS (COMPARTILHADAS) --- */
+:root {
+  --hud-w: 72px;
+  --drawer-w: 300px;
+  --gap: 24px;
+  --controls-h: 48px;
+  
+  /* Física e Movimento Padronizados */
+  --transition-speed: 0.3s;
+  --glass-blur: blur(12px);
+  --shadow-float: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+/* 1. TVA THEME (AMBER - STANDARD) */
+:root {
+  --bg-core: #080503;
+  --bg-panel: transparent;
+  --bg-drawer: rgba(13, 8, 6, 0.90); 
+  --bg-controls: rgba(8, 5, 3, 0.80);
+  
+  --color-accent: #ff8a1e;
+  --color-accent-dim: rgba(255, 138, 30, 0.2);
+  --color-text: #ff8a1e;
+  --color-muted: rgba(255, 138, 30, 0.5);
+  
+  --border-style: 1px solid rgba(255, 138, 30, 0.2);
+  --grid-opacity: 0.08;
+  --font-ui: "Share Tech Mono", monospace;
+  --radius: 2px;
+}
+
+/* --- FAMÍLIA IBM (TRÍADE) --- */
+
+/* 2. IBM LIGHT */
+[data-theme="ibm-light"] {
+  --bg-core: #eef2f6;            
+  --bg-panel: transparent; 
+  --bg-drawer: rgba(255, 255, 255, 0.75);
+  --bg-controls: rgba(255, 255, 255, 0.60);
+  
+  --color-text: #1e3a66;         
+  --color-accent: #2962ff;       
+  --color-accent-dim: rgba(41, 98, 255, 0.1);
+  --color-muted: #6b7c93;        
+  
+  --border-style: 1px solid rgba(41, 98, 255, 0.15);
+  --grid-opacity: 0.05;
+  --font-ui: "IBM Plex Mono", monospace;
+  --radius: 2px; 
+}
+
+/* 3. IBM DARK */
+[data-theme="ibm-dark"] {
+  --bg-core: #1e3a66;            
+  --bg-panel: transparent; 
+  --bg-drawer: rgba(13, 24, 41, 0.85);
+  --bg-controls: rgba(13, 24, 41, 0.70);
+  
+  --color-text: #d0e2ff;         
+  --color-accent: #4589ff;       
+  --color-accent-dim: rgba(69, 137, 255, 0.15);
+  --color-muted: #8fa3c4;        
+  
+  --border-style: 1px solid rgba(160, 200, 255, 0.15);
+  --grid-opacity: 0.08;
+  --font-ui: "IBM Plex Mono", monospace;
+  --radius: 2px; 
+}
+
+/* 4. IBM BLUE */
+[data-theme="ibm-blue"] {
+  --bg-core: #294D81;            
+  --bg-panel: transparent; 
+  --bg-drawer: rgba(30, 60, 110, 0.85);
+  --bg-controls: rgba(30, 60, 110, 0.70);
+  
+  --color-text: #ffffff;      
+  --color-accent: #64b5f6;      
+  --color-accent-dim: rgba(100, 181, 246, 0.2);
+  --color-muted: #aab6ce;        
+  
+  --border-style: 1px solid rgba(255, 255, 255, 0.15);
+  --grid-opacity: 0.1;
+  --font-ui: "IBM Plex Mono", monospace;
+  --radius: 2px; 
+}
+
+/* --- OUTROS --- */
+
+/* 5. JORNAL THEME */
+[data-theme="journal"] {
+  --bg-core: #c4c4c4;
+  --bg-panel: transparent;
+  --bg-drawer: rgba(230, 230, 230, 0.90);
+  --bg-controls: rgba(230, 230, 230, 0.80);
+  
+  --color-text: #111111; 
+  --color-accent: #333333; 
+  --color-accent-dim: rgba(0, 0, 0, 0.05);
+  --color-muted: #555555;
+  
+  --border-style: 1px solid rgba(0, 0, 0, 0.1);
+  --grid-opacity: 0.0;
+  --font-ui: "Cormorant Garamond", serif;
+  --radius: 2px; 
+}
+
+/* 6. TERMINAL THEME */
+[data-theme="terminal"] {
+  --bg-core: #000000;
+  --bg-panel: transparent;
+  --bg-drawer: rgba(0, 20, 0, 0.90);
+  --bg-controls: rgba(0, 20, 0, 0.80);
+  
+  --color-text: #00ff41; 
+  --color-accent: #00ff41;
+  --color-accent-dim: rgba(0, 255, 65, 0.15);
+  --color-muted: #008f11;
+  
+  --border-style: 1px solid rgba(0, 255, 65, 0.25);
+  --grid-opacity: 0.15;
+  --font-ui: "Fira Code", monospace;
+  --radius: 0px;
+}
+
+/* --- RESET E COMPORTAMENTOS GERAIS --- */
+* { box-sizing: border-box; outline: none !important; scrollbar-width: thin; scrollbar-color: var(--color-accent) transparent; }
+
+html, body {
+  height: 100%; width: 100%; margin: 0; overflow: hidden;
+  font-family: var(--font-ui); color: var(--color-text); background: var(--bg-core);
+  
+  /* MOVIMENTO DE RESPIRAÇÃO (Breathing UI) - PADRÃO DE 3s */
+  transition: background var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1), 
+              color var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+body::before {
+  content: ""; position: fixed; inset: 0; z-index: -5;
+  background: url("../../assets/images/grid2.jpg") repeat center center;
+  background-size: 256px 256px; opacity: var(--grid-opacity); pointer-events: none;
+  filter: grayscale(100%); 
+}
+
+/* Highlight Adaptativo */
+mark { background-color: var(--color-accent); color: var(--bg-core); padding: 2px 4px; border-radius: 2px; }
+
+[data-theme="ibm-light"] mark { color: #fff; }
+[data-theme="ibm-dark"] mark { color: #fff; }
+[data-theme="ibm-blue"] mark { background-color: #fff; color: #294D81; }
+[data-theme="journal"] mark { background-color: #555; color: #fff; }
+
+/* --- EDITOR FEATURES --- */
+#editor {
+    /* Hifenização */
+    -webkit-hyphens: auto;
+    -moz-hyphens: auto;
+    -ms-hyphens: auto;
+    hyphens: auto;
+    text-align: justify; /* Melhora a hifenização */
+}
+
+/* --- DEEP FOCUS MODE (Respiração) --- */
+/* Estado Padrão: Transição de retorno de 3s (ao clicar fora) */
+.hud, .controls, .logo-area, .drawer {
+    opacity: 1;
+    transition: opacity 3s ease; 
+}
+
+/* Estado Ativo: Digitando (15% Opacidade) */
+body.focus-active .hud,
+body.focus-active .controls, 
+body.focus-active .logo-area,
+body.focus-active .drawer {
+    opacity: 0.15;
+}
+
+/* Estado Lento: Retorno após 10s ocioso (6s de transição) */
+body.slow-return .hud,
+body.slow-return .controls,
+body.slow-return .logo-area,
+body.slow-return .drawer {
+    transition: opacity 6s ease-in; 
+}
